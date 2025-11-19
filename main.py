@@ -1,7 +1,7 @@
 import csv
 from tabulate import tabulate
 from collections import defaultdict
-
+import argparse
 
 
 def load_table(table):
@@ -31,11 +31,23 @@ def func2(data):
 
 
 if __name__ == '__main__':
-    data1 = load_table('employees1.csv')
-    data2 = load_table('employees2.csv')
-    extracted_data1 = func1(data1)
-    extracted_data2 = func1(data2)
-    general_list = extracted_data1 + extracted_data2[1:]
-    final_data = func2(general_list)
-    headers = ["position", "performance"]
-    print(tabulate(final_data, headers=headers, tablefmt='fancy_grid'))
+    parser = argparse.ArgumentParser(description="Скрипт для анализа сотрудников.")
+    parser.add_argument("--files", nargs="+", help="Файлы CSV для загрузки")
+    parser.add_argument("--report", choices=["performance"], default="performance", help="Тип генерируемого отчета")
+    args = parser.parse_args()
+
+    # Загружаем таблицы из указанных файлов
+    tables = [load_table(f) for f in args.files]
+
+    # Объединяем данные из таблиц
+    combined_data = []
+    for t in tables:
+        extracted_data = func1(t)
+        combined_data.extend(extracted_data[1:])
+
+    # Генерируем итоговую таблицу
+    final_data = func2(combined_data)
+
+    # Выводим итоговую таблицу
+    headers = ["Position", "Performance"]
+    print(tabulate(final_data, headers=headers, tablefmt="fancy_grid"))
